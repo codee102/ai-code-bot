@@ -1,29 +1,44 @@
 import fs from "fs";
 import path from "path";
 
-export function parseAndWriteFiles(aiChanges) {
-  const fileBlocks = aiChanges.split(/(?:Updated|New) File:/).slice(1); // Split into file sections
+export function parseAndWriteFiles(aiResponse) {
+  // Split the response correctly by the marker (Updated File or New File)
+  const fileSections = aiResponse
+    .split(/(Updated File:|New File:)/g)
+    .filter(Boolean);
 
-  fileBlocks.forEach((block) => {
-    const [filePathLine, ...rest] = block.trim().split("\n");
-    const filePath = filePathLine.trim();
+  for (let i = 0; i < fileSections.length; i++) {
+    const section = fileSections[i];
 
-    const codeMatch = rest.join("\n").match(/```(?:\w+)?\n([\s\S]*?)```/);
-    if (!codeMatch) {
-      console.warn(`⚠️ No code block found for ${filePath}`);
-      return;
+    if (
+      section.startsWith("Updated File:") ||
+      section.startsWith("New File:")
+    ) {
+      const filePathLine = fileSections[i + 1];
+
+      // Corrected regex to match paths without splitting by spaces
+      const match = filePathLine.match(
+        /(.+)\n```(?:javascript)?\n([\s\S]+?)```/,
+      );
+
+      if (match) {
+        const relativePath = match[1].trim(); // The file path
+        const fileContent = match[2]; // The file content
+
+        // Ensure that the path is correct and is relative to the project root
+        const fullPath = path.join(process.cwd(), relativePath);
+
+        const dirName = path.dirname(fullPath);
+
+        // 🛠️ Create folders if they don't exist
+        if (!fs.existsSync(dirName)) {
+          fs.mkdirSync(dirName, { recursive: true });
+          console.log(`✅ Created folder: ${dirName}`);
+        }
+
+        fs.writeFileSync(fullPath, fileContent, "utf8");
+        console.log(`✅ Wrote file: ${relativePath}`);
+      }
     }
-
-    const codeContent = codeMatch[1];
-
-    // Ensure directory exists
-    const dirName = path.dirname(filePath);
-    if (!fs.existsSync(dirName)) {
-      fs.mkdirSync(dirName, { recursive: true });
-    }
-
-    // Write the file
-    fs.writeFileSync(filePath, codeContent, "utf8");
-    console.log(`✅ Updated: ${filePath}`);
-  });
+  }
 }
