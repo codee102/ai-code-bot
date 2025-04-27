@@ -25,7 +25,7 @@ async function main() {
   process.chdir(localPath);
 
   const projectFiles = readProjectFiles(localPath);
-  const issueDescription = "Add a POST route /user to create a new user";
+  const issueDescription = "Add POST /users to create a new user.";
 
   const aiChanges = await askAIToModifyCode(issueDescription, projectFiles);
   console.log("AI suggests:\n", aiChanges);
