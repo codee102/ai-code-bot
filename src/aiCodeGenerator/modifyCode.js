@@ -21,12 +21,11 @@ export async function askAIToModifyCode(issueDescription, projectFiles) {
   ${issueDescription}
 
   ⚡ Important Instructions:
-- Only output UPDATED or NEW files.
-- For each file, start with: Updated File: project path src/file.js
-- Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
-- DO NOT explain anything. Only give the files.
-- No bullet points, no guides, no steps. Only files.
-
+  - Only output UPDATED or NEW files.
+  - For each file, start with: Updated File: path/to/file.js
+  - Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
+  - DO NOT explain anything. Only give the files.
+  - No bullet points, no guides, no steps. Only files.
   `;
 
   const messages = [
