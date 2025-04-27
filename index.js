@@ -26,7 +26,14 @@ async function main() {
   process.chdir(localPath);
 
   const projectFiles = readProjectFiles(localPath);
-  const issueDescription = "Add POST /users to create a new user.";
+  const issueDescription = `
+  Create a new Express route at POST /users that accepts a JSON body with user data and returns the created user.
+
+  - Create a new controller if necessary.
+  - Update existing routes.
+  - Handle basic validation (e.g., name and email required).
+  - Follow current project structure and coding conventions.
+  `;
 
   const aiChanges = await askAIToModifyCode(issueDescription, projectFiles);
   console.log("AI suggests:\n", aiChanges);
