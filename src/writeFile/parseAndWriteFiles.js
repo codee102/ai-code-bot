@@ -1,13 +1,27 @@
 import fs from "fs";
 import path from "path";
 
+// Helper function to sanitize the AI-generated file path
+function cleanPath(filePath) {
+  const projectRoot = process.cwd(); // Get the project root path
+  console.log(`Project Root: ${projectRoot}`); // Log the project root
+
+  if (filePath.startsWith(projectRoot)) {
+    const clean = filePath.slice(projectRoot.length + 1); // Remove the project root part
+    console.log(`Sanitized Path (absolute to relative): ${clean}`);
+    return clean;
+  }
+
+  console.log(`Path is already relative: ${filePath.trim()}`);
+  return filePath.trim();
+}
+
 export function parseAndWriteFiles(aiResponse) {
-  // Split the response by the markers, but make sure not to split on file paths
+  // Split the response correctly by the marker (Updated File or New File)
   const fileSections = aiResponse
     .split(/(Updated File:|New File:)/g)
     .filter(Boolean);
 
-  // Iterate through the file sections and handle each one
   for (let i = 0; i < fileSections.length; i++) {
     const section = fileSections[i];
 
@@ -17,28 +31,37 @@ export function parseAndWriteFiles(aiResponse) {
     ) {
       const filePathLine = fileSections[i + 1];
 
-      // Update the regex to capture full file paths without breaking them by space
+      // Match the path and content correctly
       const match = filePathLine.match(
         /(.+)\n```(?:javascript)?\n([\s\S]+?)```/,
       );
 
       if (match) {
-        const relativePath = match[1].trim(); // Extract the full relative path
-        const fileContent = match[2]; // Extract the file content
+        let relativePath = match[1].trim(); // The file path
+        const fileContent = match[2]; // The file content
 
-        // Sanitize path handling: Ensure we're joining relative paths correctly with the project root
+        // Sanitize the path to ensure it's relative to the project root
+        relativePath = cleanPath(relativePath);
+
+        // Now join the sanitized relative path with the project root
         const fullPath = path.join(process.cwd(), relativePath);
 
-        // Get the directory name for the path
-        const dirName = path.dirname(fullPath);
+        // Log the full path being created
+        console.log(`Full Path: ${fullPath}`);
 
-        // Create the directory if it doesn't exist
+        // Get the directory name from the full path
+        const dirName = path.dirname(fullPath);
+        console.log(`Directory Name: ${dirName}`);
+
+        // Create folders if they don't exist
         if (!fs.existsSync(dirName)) {
+          console.log(`Creating directory: ${dirName}`);
           fs.mkdirSync(dirName, { recursive: true });
-          console.log(`✅ Created folder: ${dirName}`);
+        } else {
+          console.log(`Directory already exists: ${dirName}`);
         }
 
-        // Write the file content to the specified path
+        // Write the file content to the correct file path
         fs.writeFileSync(fullPath, fileContent, "utf8");
         console.log(`✅ Wrote file: ${relativePath}`);
       }
