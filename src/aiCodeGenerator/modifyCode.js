@@ -5,8 +5,7 @@ dotenv.config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function askAIToModifyCode(issueDescription, projectFiles) {
-  const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.
-  Only return updated file contents inside clearly labeled markdown code blocks.`;
+  const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.`;
 
   const fileContext = projectFiles
     .map((file) => {
@@ -15,14 +14,19 @@ export async function askAIToModifyCode(issueDescription, projectFiles) {
     .join("\n\n");
 
   const userPrompt = `
-  Here are some project files:
+  Here are the project files:
   ${fileContext}
 
   The issue to solve:
   ${issueDescription}
 
-  Please suggest updated or new files to implement the feature.
-  Return code inside triple backticks and specify filenames.
+  ⚡ Important Instructions:
+- Only output UPDATED or NEW files.
+- For each file, start with: Updated File: project path src/file.js
+- Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
+- DO NOT explain anything. Only give the files.
+- No bullet points, no guides, no steps. Only files.
+
   `;
 
   const messages = [
