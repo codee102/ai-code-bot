@@ -7,13 +7,18 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function askAIToModifyCode(issueDescription, projectFiles) {
   const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.
 
-  ⚡ Important Instructions:
-  - Always return file paths **relative to the project root**. Do **NOT** use absolute paths.
-  - Only output UPDATED or NEW files.
-  - For each file, start with: Updated File: path/to/file.js
-  - Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
-  - DO NOT explain anything. Only give the files.
-  - No bullet points, no guides, no steps. Only files.`;
+⚡ Important Instructions:
+- Always return file paths **relative to the project root**. Do **NOT** use absolute paths.
+- Only output UPDATED or NEW files.
+- For each file, start with: Updated File: path/to/file.js
+- Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
+- DO NOT explain anything. Only give the files.
+- No bullet points, no guides, no steps. Only files.
+- If creating new files (e.g., controllers, routes), place them in their correct directories, following the existing project structure.
+
+If a new route is required, add a new route file (e.g., "routes/userRoutes.js").
+If a new controller is required, create a new controller file (e.g., "controllers/userController.js").
+Ensure that all files are created in the correct folders, relative to the project root, and adhere to existing conventions.`;
 
   const fileContext = projectFiles
     .map((file) => {
@@ -22,19 +27,23 @@ export async function askAIToModifyCode(issueDescription, projectFiles) {
     .join("\n\n");
 
   const userPrompt = `
-  Here are the project files:
-  ${fileContext}
+Here are the project files:
+${fileContext}
 
-  The issue to solve:
-  ${issueDescription}
+The issue to solve:
+${issueDescription}
 
-  ⚡ Important Instructions:
-  - Only output UPDATED or NEW files.
-  - For each file, start with: Updated File: path/to/file.js
-  - Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
-  - DO NOT explain anything. Only give the files.
-  - No bullet points, no guides, no steps. Only files.
-  `;
+⚡ Important Instructions:
+- Only output UPDATED or NEW files.
+- For each file, start with: Updated File: path/to/file.js
+- Then show the full new content between triple backticks (\`\`\`javascript ... \`\`\`).
+- DO NOT explain anything. Only give the files.
+- No bullet points, no guides, no steps. Only files.
+- If creating new files (e.g., controllers, routes), place them in their correct directories, following the existing project structure.
+
+If a new route is required, add a new route file (e.g., \`routes/userRoutes.js\`).
+If a new controller is required, create a new controller file (e.g., \`controllers/userController.js\`).
+Ensure that all files are created in the correct folders, relative to the project root, and adhere to existing conventions.`;
 
   const messages = [
     { role: "system", content: systemPrompt },

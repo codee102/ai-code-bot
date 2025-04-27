@@ -34,7 +34,6 @@ async function main() {
   - Handle basic validation (e.g., name and email required).
   - Follow current project structure and coding conventions.
   `;
-
   const aiChanges = await askAIToModifyCode(issueDescription, projectFiles);
   console.log("AI suggests:\n", aiChanges);
 
