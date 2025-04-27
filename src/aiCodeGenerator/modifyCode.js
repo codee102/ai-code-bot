@@ -5,8 +5,7 @@ dotenv.config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function askAIToModifyCode(issueDescription, projectFiles) {
-  const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.
-  Only return updated file contents inside clearly labeled markdown code blocks.`;
+  const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.`;
 
   const fileContext = projectFiles
     .map((file) => {
@@ -15,7 +14,7 @@ export async function askAIToModifyCode(issueDescription, projectFiles) {
     .join("\n\n");
 
   const userPrompt = `
-  Here are some project files:
+  Here are the project files:
   ${fileContext}
 
   The issue to solve:
