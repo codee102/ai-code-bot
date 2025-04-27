@@ -7,17 +7,6 @@ const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 export async function askAIToModifyCode(issueDescription, projectFiles) {
   const messages = [
     {
-      role: "system",
-      content:
-        "You are an expert software engineer. Modify only necessary parts, keep style consistent.",
-    },
-    {
-      role: "user",
-      content: `Here are some project files:\n\n${projectFiles
-        .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-        .join("\n\n")}`,
-    },
-    {
       role: "user",
       content: `Given the above project, solve this issue:\n${issueDescription}\nReturn updated file(s) and explain changes.`,
     },
