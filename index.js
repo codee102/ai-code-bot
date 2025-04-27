@@ -9,6 +9,7 @@ import {
   commitAndPushChanges,
 } from "./src//githubManager/gitOps.js";
 import { createPullRequest } from "./src//githubManager/pullRequest.js";
+import { parseAndWriteFiles } from "./src/writeFile/parseAndWriteFiles.js"; // <--- new helper
 
 import fs from "fs";
 import path from "path";
@@ -25,12 +26,13 @@ async function main() {
   process.chdir(localPath);
 
   const projectFiles = readProjectFiles(localPath);
-  const issueDescription = "Add a POST endpoint to create a new user";
+  const issueDescription = "Add POST /users to create a new user.";
 
   const aiChanges = await askAIToModifyCode(issueDescription, projectFiles);
   console.log("AI suggests:\n", aiChanges);
 
-  fs.writeFileSync("app.js", aiChanges); // Modify existing file, or smarter update later
+  // fs.writeFileSync("app.js", aiChanges); // Modify existing file, or smarter update later
+  parseAndWriteFiles(aiChanges);
 
   const branchName = `feature/${Date.now()}`;
   await createBranch(branchName);

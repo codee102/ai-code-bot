@@ -5,26 +5,33 @@ dotenv.config();
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 export async function askAIToModifyCode(issueDescription, projectFiles) {
+  const systemPrompt = `You are a senior software engineer. Modify the given project files as per the issue described.
+  Only return updated file contents inside clearly labeled markdown code blocks.`;
+
+  const fileContext = projectFiles
+    .map((file) => {
+      return `File: ${file.path}\n\`\`\`\n${file.content}\n\`\`\``;
+    })
+    .join("\n\n");
+
+  const userPrompt = `
+  Here are some project files:
+  ${fileContext}
+
+  The issue to solve:
+  ${issueDescription}
+
+  Please suggest updated or new files to implement the feature.
+  Return code inside triple backticks and specify filenames.
+  `;
+
   const messages = [
-    {
-      role: "system",
-      content:
-        "You are an expert software engineer. Modify only necessary parts, keep style consistent.",
-    },
-    {
-      role: "user",
-      content: `Here are some project files:\n\n${projectFiles
-        .map((f) => `File: ${f.path}\n\`\`\`\n${f.content}\n\`\`\``)
-        .join("\n\n")}`,
-    },
-    {
-      role: "user",
-      content: `Given the above project, solve this issue:\n${issueDescription}\nReturn updated file(s) and explain changes.`,
-    },
+    { role: "system", content: systemPrompt },
+    { role: "user", content: userPrompt },
   ];
 
   const response = await openai.chat.completions.create({
-    model: "gpt-3.5-turbo",
+    model: "gpt-4-turbo",
     messages,
     temperature: 0.2,
   });
